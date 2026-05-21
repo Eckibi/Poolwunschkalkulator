@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Cache-Control: Verhindert, dass Browser alte Versionen deines Codes zwischenspeichern -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -198,7 +199,9 @@
 </head>
 <body class="min-h-screen p-4 md:p-10">
 
+    <!-- KOMPAKTE PDF-DRUCKANSICHT (Wird nur beim Drucken/PDF-Export gerendert) -->
     <div id="print-material-list">
+        <!-- Briefkopf / Header -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0abab5; padding-bottom: 15px; margin-bottom: 20px;">
             <div>
                 <h1 style="font-size: 24px; font-weight: 800; margin: 0; color: black;">POOLWUNSCH KALKULATION</h1>
@@ -310,7 +313,9 @@
         </div>
     </div>
 
+    <!-- INTERAKTIVES WEB-DASHBOARD (Normale Ansicht im Browser) -->
     <div class="max-w-6xl mx-auto">
+        <!-- Header -->
         <header class="flex flex-col md:flex-row md:items-end justify-between mb-8 space-y-4 md:space-y-0">
             <div>
                 <div class="flex items-center mb-1">
@@ -319,7 +324,11 @@
                 </div>
                 <p class="text-slate-400 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
             </div>
-            <div class="flex items-center space-x-4 no-print">
+            <div class="flex items-center space-x-3 no-print">
+                <!-- Vollbildmodus Button -->
+                <button onclick="toggleFullscreen()" class="flex items-center px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-sm transition-all border border-slate-700 shadow-xl" id="fullscreenBtn" title="Vollbildmodus umschalten">
+                    <i class="fas fa-expand mr-2"></i> Vollbild
+                </button>
                 <button onclick="prepareAndPrint()" class="flex items-center px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all border border-slate-700 shadow-xl">
                     <i class="fas fa-file-pdf mr-2 text-red-500"></i> PDF Export für Mitarbeiter
                 </button>
@@ -491,6 +500,7 @@
                     </div>
                 </div>
 
+                <!-- ZEICHENFLÄCHE FÜR DEN BAULEITER -->
                 <div class="glass-card p-8 rounded-3xl no-print">
                     <h2 class="text-xl font-bold text-white mb-2 flex items-center uppercase tracking-wider">
                         <i class="fas fa-paint-brush mr-3 tiffany-text"></i> Vor-Ort Skizze / Lageplan
@@ -498,10 +508,22 @@
                     <p class="text-xs text-slate-400 mb-4">Ideal für das iPad, um Hindernisse, Skimmer-Positionen oder Gartenmaße einzuzeichnen.</p>
                     
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-3 p-3 bg-slate-900/60 rounded-2xl border border-slate-700/50">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="setSketchColor('#ffffff', this)" class="w-6 h-6 rounded-full bg-white border-2 border-tiffany transition-all" title="Weiß"></button>
-                            <button onclick="setSketchColor('#0abab5', this)" class="w-6 h-6 rounded-full bg-[#0abab5] border border-transparent transition-all" title="Tiffany"></button>
-                            <button onclick="setSketchColor('#ef4444', this)" class="w-6 h-6 rounded-full bg-red-500 border border-transparent transition-all" title="Rot"></button>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Farben -->
+                            <div class="flex items-center space-x-2">
+                                <button onclick="setSketchColor('#ffffff', this)" class="w-6 h-6 rounded-full bg-white border-2 border-tiffany transition-all" title="Weiß"></button>
+                                <button onclick="setSketchColor('#0abab5', this)" class="w-6 h-6 rounded-full bg-[#0abab5] border border-transparent transition-all" title="Tiffany"></button>
+                                <button onclick="setSketchColor('#ef4444', this)" class="w-6 h-6 rounded-full bg-red-500 border border-transparent transition-all" title="Rot"></button>
+                            </div>
+                            <!-- Werkzeuge: Freihand / Gerade Linien -->
+                            <div class="flex bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs">
+                                <button id="tool-freehand" onclick="setDrawingTool('freehand')" class="px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700">
+                                    <i class="fas fa-signature mr-1"></i> Freihand
+                                </button>
+                                <button id="tool-line" onclick="setDrawingTool('line')" class="px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white">
+                                    <i class="fas fa-ruler-combined mr-1"></i> Linie
+                                </button>
+                            </div>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Stärke:</span>
@@ -570,6 +592,12 @@
         let strokeColor = '#ffffff';
         let strokeWidth = 4;
         let sketchHistory = []; // Für die "Rückgängig"-Funktion
+        
+        // Zeichenwerkzeug: 'freehand' (Freihand) oder 'line' (Gerade Linie)
+        let activeTool = 'freehand'; 
+        let startX = 0;
+        let startY = 0;
+        let drawingMetadata = null; // Speichert den Canvas-Zustand beim Starten einer Linie
 
         function renderTechItems() {
             const container = document.getElementById("tech-container");
@@ -587,8 +615,59 @@
         }
 
         // ==========================================
-        // SKIZZEN LOGIK (IPAD & TOUCH COMPATIBLE)
+        // VOLLBILDMODUS LOGIK
         // ==========================================
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    requestFullScreen.call(docEl);
+                    updateFullscreenBtn(true);
+                }
+            } else {
+                if (cancelFullScreen) {
+                    cancelFullScreen.call(doc);
+                    updateFullscreenBtn(false);
+                }
+            }
+        }
+
+        function updateFullscreenBtn(isFullscreen) {
+            const btn = document.getElementById('fullscreenBtn');
+            if (isFullscreen) {
+                btn.innerHTML = '<i class="fas fa-compress mr-2"></i> Beenden';
+            } else {
+                btn.innerHTML = '<i class="fas fa-expand mr-2"></i> Vollbild';
+            }
+        }
+
+        // Event-Listener für physisches Esc/Fullscreen-Änderung
+        document.addEventListener('fullscreenchange', () => updateFullscreenBtn(!!document.fullscreenElement));
+        document.addEventListener('webkitfullscreenchange', () => updateFullscreenBtn(!!document.webkitFullscreenElement));
+
+        // ==========================================
+        // SKIZZEN LOGIK (IPAD & TOUCH COMPATIBLE - JETZT MIT GERADEN LINIEN)
+        // ==========================================
+        function setDrawingTool(tool) {
+            activeTool = tool;
+            
+            const btnFreehand = document.getElementById('tool-freehand');
+            const btnLine = document.getElementById('tool-line');
+            
+            if (tool === 'freehand') {
+                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
+                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
+            } else {
+                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
+                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
+            }
+        }
+
         function initCanvas() {
             canvas = document.getElementById('sketchCanvas');
             ctx = canvas.getContext('2d');
@@ -651,21 +730,45 @@
 
         function startDrawing(e) {
             isDrawing = true;
-            ctx.beginPath();
             const rect = canvas.getBoundingClientRect();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            
+            ctx.beginPath();
+            
+            if (activeTool === 'freehand') {
+                ctx.moveTo(startX, startY);
+            } else {
+                // Für das Linientool machen wir einen "Snapshot" vom aktuellen Canvas-Inhalt
+                drawingMetadata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            }
         }
 
         function draw(e) {
             if (!isDrawing) return;
+            
             ctx.lineWidth = strokeWidth;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = strokeColor;
 
             const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            if (activeTool === 'freehand') {
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+            } else {
+                // Bei gerade Linie: Stellt den Zustand vor dem Zeichnen wieder her (für flüssiges Ziehen)
+                if (drawingMetadata) {
+                    ctx.putImageData(drawingMetadata, 0, 0);
+                }
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+            }
         }
 
         function stopDrawing() {
@@ -678,7 +781,6 @@
 
         function setSketchColor(color, btn) {
             strokeColor = color;
-            // Border-Highlighting auf den Farb-Buttons anpassen
             const buttons = btn.parentElement.querySelectorAll('button');
             buttons.forEach(b => b.classList.remove('border-tiffany'));
             buttons.forEach(b => b.classList.add('border-transparent'));
@@ -698,13 +800,13 @@
         }
 
         function saveState() {
-            if (sketchHistory.length >= 20) sketchHistory.shift(); // Max 20 Schritte im Cache
+            if (sketchHistory.length >= 20) sketchHistory.shift(); 
             sketchHistory.push(canvas.toDataURL());
         }
 
         function undoSketch() {
             if (sketchHistory.length > 1) {
-                sketchHistory.pop(); // Aktuellen Zustand löschen
+                sketchHistory.pop(); 
                 const previousState = sketchHistory[sketchHistory.length - 1];
                 const img = new Image();
                 img.src = previousState;
@@ -716,9 +818,7 @@
             }
         }
 
-        // Prüft ob auf dem Canvas gezeichnet wurde (wichtig fürs PDF)
         function isCanvasBlank() {
-            // Wenn die Historie nur aus 1 Element (Zustand Leer) besteht, ist es unberührt
             return sketchHistory.length <= 1;
         }
 
@@ -811,7 +911,6 @@
             document.getElementById('p-mat-vlies').innerText = document.getElementById('res-vlies-gross').innerText;
             document.getElementById('p-mat-angles').innerText = document.getElementById('res-angles-top').innerText;
 
-            // Skizze in die PDF-Ansicht konvertieren und einbetten
             const sketchSection = document.getElementById('print-sketch-section');
             if (!isCanvasBlank()) {
                 const dataUrl = canvas.toDataURL();
