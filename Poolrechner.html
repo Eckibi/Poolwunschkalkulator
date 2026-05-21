@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Cache-Control: Verhindert, dass Browser alte Versionen deines Codes zwischenspeichern -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>Poolwunsch Kalkulator - by Jerry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --tiffany: #0abab5; 
+            --tiffany-soft: rgba(10, 186, 181, 0.1);
+            --dark-bg: #0f172a;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .tiffany-text { color: var(--tiffany); }
+        .tiffany-bg { background-color: var(--tiffany); }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease-in-out;
+            height: 100%;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(10, 186, 181, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Statische Glass-Card ohne Hover-Schatten und Animation (wird aktuell nicht genutzt, bleibt als Fallback) */
+        .glass-card-static {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100%;
+        }
+
+        .result-item-box {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            transition: border-color 0.3s;
+        }
+
+        .result-item-box:hover {
+            border-color: var(--tiffany);
+        }
+
+        .input-focus:focus {
+            outline: none;
+            border-color: var(--tiffany);
+            box-shadow: 0 0 0 2px var(--tiffany-soft);
+        }
+
+        .toggle-btn.active {
+            background-color: var(--tiffany);
+            color: white;
+            border-color: var(--tiffany);
+        }
+
+        /* Premium Custom Checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 1.3rem;
+            height: 1.3rem;
+            border: 2px solid #475569;
+            border-radius: 0.375rem;
+            background-color: #0f172a;
+            cursor: pointer;
+            display: inline-grid;
+            place-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox:hover {
+            border-color: var(--tiffany);
+        }
+
+        .custom-checkbox:checked {
+            background-color: var(--tiffany);
+            border-color: var(--tiffany);
+        }
+
+        .custom-checkbox:checked::after {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: white;
+            font-size: 0.7rem;
+        }
+
+        /* Sanfte Animation für die Kommentarfelder */
+        .comment-field {
+            animation: slideDown 0.25s ease-out forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+            to { opacity: 1; transform: translateY(0); max-height: 80px; }
+        }
+
+        /* Versteckter Container für die kompakte PDF-Druckansicht */
+        #print-material-list {
+            display: none;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--tiffany); }
+
+        /* PRINT STYLES FÜR DEN PDF-EXPORT */
+        @media print {
+            /* Verberge die gesamte interaktive Web-Oberfläche */
+            body > div.max-w-6xl {
+                display: none !important;
+            }
+
+            /* Aktiviere und formatiere die saubere, kompakte Materialliste */
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 11px !important;
+            }
+
+            #print-material-list {
+                display: block !important;
+                width: 100% !important;
+                padding: 20px !important;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+                margin-bottom: 20px;
+            }
+
+            .print-table th {
+                background-color: #f1f5f9 !important;
+                color: black !important;
+                text-align: left;
+                padding: 6px 8px;
+                font-weight: bold;
+                border-bottom: 2px solid #cbd5e1;
+                font-size: 11px;
+                text-transform: uppercase;
+            }
+
+            .print-table td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #e2e8f0;
+                color: black !important;
+                font-size: 11px;
+            }
+
+            .print-table tr:nth-child(even) {
+                background-color: #f8fafc;
+            }
+
+            .print-section-header {
+                font-size: 13px !important;
+                font-weight: bold !important;
+                border-bottom: 1px solid #475569;
+                padding-bottom: 4px;
+                margin-top: 20px;
+                margin-bottom: 10px;
+                color: black !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-10">
+
+    <!-- KOMPAKTE PDF-DRUCKANSICHT (Wird nur beim Drucken/PDF-Export gerendert) -->
+    <div id="print-material-list">
+        <!-- Briefkopf / Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0abab5; padding-bottom: 15px; margin-bottom: 20px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 800; margin: 0; color: black;">POOLWUNSCH KALKULATION</h1>
+                <p style="color: #64748b; font-size: 10px; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Material- & Bedarfsaufstellung für Mitarbeiter</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="font-weight: bold; font-size: 12px; margin: 0;">Erstellt am: <span id="print-date">-</span></p>
+                <p style="color: #64748b; font-size: 9px; margin: 2px 0 0 0;">Mitarbeiter: Jerry</p>
+            </div>
+        </div>
+
+        <!-- Kundendaten & Maße nebeneinander -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 15px;">
+            <!-- Kundendaten -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Kundendaten / Bauvorhaben</h3>
+                <table style="width: 100%; font-size: 11px;">
+                    <tr><td style="width: 80px; color: #64748b; padding: 2px 0;">Name:</td><td style="font-weight: bold;" id="p-cust-name">-</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Straße:</td><td id="p-cust-street">-</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Ort:</td><td id="p-cust-city">-</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">E-Mail:</td><td id="p-cust-email">-</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Telefon:</td><td id="p-cust-phone">-</td></tr>
+                </table>
+            </div>
+
+            <!-- Eingegebene Maße -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Spezifikationen & Poolmaße</h3>
+                <table style="width: 100%; font-size: 11px;">
+                    <tr><td style="width: 120px; color: #64748b; padding: 2px 0;">Länge Innen:</td><td style="font-weight: bold;" id="p-pool-length">- m</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Breite Innen:</td><td style="font-weight: bold;" id="p-pool-width">- m</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Tiefe:</td><td style="font-weight: bold;" id="p-pool-depth">- m</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Modus Verfüllung:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-mode">-</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Bewehrung BP:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-layers">1-Lagig</td></tr>
+                    <tr><td style="color: #64748b; padding: 2px 0;">Treppenanlage:</td><td style="font-weight: bold;" id="p-pool-stairs">Nein</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 1. Bereich: Materialbedarf Becken -->
+        <div class="print-section-header">1. Materialbedarf Becken</div>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Materialkomponente</th>
+                    <th style="width: 50%;">Menge / Einheit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold;">Styroporsteine (BigStone)</td>
+                    <td style="font-weight: bold;" id="p-mat-stones">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Endeinschübe</td>
+                    <td id="p-mat-ends">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Vertikalstahl (10mm)</td>
+                    <td id="p-mat-vsteel">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Horizontalstahl (8mm)</td>
+                    <td id="p-mat-hsteel">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Vlies Bestellung</td>
+                    <td id="p-mat-vlies">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Außenwinkel</td>
+                    <td id="p-mat-angles">-</td>
+                </tr>
+                <tr id="print-row-stairs-inner" style="display: none;">
+                    <td style="font-weight: bold; color: #b91c1c;">Alu-Winkelschienen (Treppe)</td>
+                    <td style="font-weight: bold; color: #b91c1c;">10 Stück</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 2. Bereich: Bewehrung Bodenplatte (Separiert) -->
+        <div class="print-section-header">2. Bewehrung Bodenplatte</div>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Materialkomponente</th>
+                    <th style="width: 50%;">Menge / Einheit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold;">Betonstahlmatten Q188A (6000x2300 mm)</td>
+                    <td style="font-weight: bold; color: #0abab5;" id="p-mat-steelmats">-</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Auslegung / Lagen</td>
+                    <td id="p-mat-steelmats-detail">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 3. Bereich: Ausstattungsliste -->
+        <div class="print-section-header" id="print-tech-header">3. Gewählte Technikausstattung</div>
+        <table class="print-table" id="print-tech-table">
+            <thead>
+                <tr>
+                    <th style="width: 40%;">Ausstattung / Technik</th>
+                    <th style="width: 20%;">Status</th>
+                    <th style="width: 40%;">Modellspezifische Details / Kommentare</th>
+                </tr>
+            </thead>
+            <tbody id="print-tech-tbody">
+                <!-- Wird per JS befüllt -->
+            </tbody>
+        </table>
+
+        <!-- 4. Bereich: Bodenplatten- & Arbeitskalkulation -->
+        <div class="print-section-header">4. Bodenplatte & Verfüllung Kalkulation</div>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Posten / Leistungsbeschreibung</th>
+                    <th style="width: 50%; text-align: right;">Kalkulierter Betrag</th>
+                </tr>
+            </thead>
+            <tbody id="print-calc-tbody">
+                <!-- Wird per JS befüllt -->
+            </tbody>
+        </table>
+
+        <!-- Preisbox am Ende -->
+        <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+            <div style="border: 2px solid black; padding: 15px 25px; border-radius: 8px; background-color: #f8fafc; text-align: right; width: 320px;">
+                <p style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #475569; margin: 0 0 5px 0;" id="p-total-label">Gesamtsumme (Netto)</p>
+                <h2 style="font-size: 26px; font-weight: 900; margin: 0; color: black;" id="p-total-price">0,00 €</h2>
+                <p style="font-size: 9px; color: #64748b; margin: 5px 0 0 0;">Freigabe und Kalkulation ohne Gewähr.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERAKTIVES WEB-DASHBOARD (Normale Ansicht im Browser) -->
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-end justify-between mb-8 space-y-4 md:space-y-0">
+            <div>
+                <div class="flex items-center mb-1">
+                    <i class="fas fa-swimmer tiffany-text text-3xl mr-4"></i>
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white">Poolwunsch <span class="tiffany-text">Kalkulator</span></h1>
+                </div>
+                <p class="text-slate-400 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
+            </div>
+            <div class="flex items-center space-x-4 no-print">
+                <button onclick="prepareAndPrint()" class="flex items-center px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all border border-slate-700 shadow-xl">
+                    <i class="fas fa-file-pdf mr-2 text-red-500"></i> PDF Export für Mitarbeiter
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            
+            <!-- Sidebar: Maßeingabe -->
+            <aside class="lg:col-span-1 space-y-6 no-print">
+                <div class="glass-card p-6 rounded-3xl">
+                    <h2 class="text-lg font-bold mb-6 flex items-center text-white">
+                        <i class="fas fa-sliders-h mr-3 tiffany-text"></i> Maßeingabe
+                    </h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Länge Innen (m)</label>
+                            <input type="number" id="length" value="6.00" step="0.01" oninput="calculate()" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 mt-1 text-white font-semibold input-focus text-center text-xl">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Breite Innen (m)</label>
+                            <input type="number" id="width" value="3.00" step="0.01" oninput="calculate()" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 mt-1 text-white font-semibold input-focus text-center text-xl">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tiefe (m)</label>
+                            <input type="number" id="depth" value="1.50" step="0.01" oninput="calculate()" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl p-4 mt-1 text-white font-semibold input-focus text-center text-xl">
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-700/50">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="hasStairs" onchange="toggleStairs()" class="custom-checkbox mr-3">
+                                <span class="text-sm font-semibold text-slate-300">Treppe vorhanden?</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl">
+                    <h2 class="text-sm font-bold mb-4 text-slate-400 uppercase tracking-widest">Modus & Bewehrung</h2>
+                    <div class="space-y-4">
+                        <div class="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <button id="btnKies" onclick="setMaterial('kies')" class="toggle-btn active flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">KIES</button>
+                            <button id="btnEps" onclick="setMaterial('eps')" class="toggle-btn flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">EPS</button>
+                        </div>
+                        <!-- Regler für 1-lagige oder 2-lagige Bodenplatte -->
+                        <div class="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <button id="btnLayer1" onclick="setLayers(1)" class="toggle-btn active flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">1-LAGIG</button>
+                            <button id="btnLayer2" onclick="setLayers(2)" class="toggle-btn flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">2-LAGIG</button>
+                        </div>
+                        <div class="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-700">
+                            <button id="btnNetto" onclick="setTax(false)" class="toggle-btn active flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">NETTO</button>
+                            <button id="btnBrutto" onclick="setTax(true)" class="toggle-btn flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">BRUTTO</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Panel -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <!-- Kundendaten Sektion -->
+                <div class="glass-card p-8 rounded-3xl no-print">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-wider">
+                        <i class="fas fa-user-edit mr-3 tiffany-text"></i> Kundendaten / Bauvorhaben
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Vorname</label>
+                            <input type="text" id="cust-firstname" oninput="updatePrintInputs()" placeholder="Vorname eintragen..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Nachname</label>
+                            <input type="text" id="cust-lastname" oninput="updatePrintInputs()" placeholder="Nachname eintragen..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Straße & Hausnummer</label>
+                            <input type="text" id="cust-street" oninput="updatePrintInputs()" placeholder="Straße und Hausnummer..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">PLZ & Ort</label>
+                            <input type="text" id="cust-city" oninput="updatePrintInputs()" placeholder="Postleitzahl und Ort..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">E-Mail-Adresse</label>
+                            <input type="email" id="cust-email" oninput="updatePrintInputs()" placeholder="E-Mail-Adresse des Kunden..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Telefonnummer</label>
+                            <input type="text" id="cust-phone" oninput="updatePrintInputs()" placeholder="z.B. +49 170 1234567..." class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3.5 mt-1 text-white font-semibold input-focus text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Materialbedarf Section (Jetzt rein auf das Becken fokussiert) -->
+                <div class="glass-card p-8 rounded-3xl no-print">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-wider">
+                        <i class="fas fa-cubes mr-3 tiffany-text"></i> Materialbedarf Becken
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Styroporsteine</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-stones">-</h3>
+                            <p class="text-tiffany text-[10px] mt-1 font-medium" id="res-stones-detail">Puffer inkl.</p>
+                        </div>
+
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Endeinschübe</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-ends">-</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">8 Stk / Reihe</p>
+                        </div>
+
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vertikalstahl</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-vsteel">-</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">10mm | à 1,55m</p>
+                        </div>
+
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Horizontalstahl</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-hsteel">-</h3>
+                            <p class="text-tiffany text-[10px] mt-1 font-medium" id="res-hsteel-detail">8mm | inkl. Verschnitt</p>
+                        </div>
+
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vlies Bestellung</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-vlies-gross">-</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">Boden & Wände</p>
+                        </div>
+
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-angles-top">-</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">Obere Kante</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Separierte Sektion für die Bodenplattenbewehrung (Hover-Effekt wieder hergestellt, linksbündiger Grauschatten entfernt) -->
+                <div class="glass-card p-8 rounded-3xl no-print">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-wider">
+                        <i class="fas fa-border-all mr-3 tiffany-text"></i> Bewehrung Bodenplatte
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Stahlmatten Q188A</p>
+                            <h3 class="text-2xl font-black mt-1 text-white" id="res-steelmats">-</h3>
+                            <p class="text-tiffany text-[10px] mt-1 font-medium">Standardmatte: 6000 x 2300 mm</p>
+                        </div>
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Auslegung & Verlegeart</p>
+                            <h3 class="text-xl font-bold mt-1 text-white" id="res-steelmats-detail">-</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">Sichere Kalkulation inkl. 33% Überlappung</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technikausstattung Section -->
+                <div class="glass-card p-8 rounded-3xl no-print">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-wider">
+                        <i class="fas fa-cog mr-3 tiffany-text"></i> Technikausstattung
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="tech-container">
+                        <!-- Wird automatisch per JavaScript befüllt -->
+                    </div>
+                </div>
+
+                <!-- Treppen Section (Interactive Web) -->
+                <div id="card-stairs" class="glass-card p-8 rounded-3xl hidden no-print">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-wider">
+                        <i class="fas fa-stairs mr-3 tiffany-text"></i> Alu-Winkelschienen (Treppe)
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Innenwinkel</p>
+                            <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                        </div>
+                        <div class="result-item-box">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
+                            <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bodenplatte Section -->
+                <div class="glass-card p-8 rounded-3xl no-print">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <h2 class="text-xl font-bold text-white flex items-center uppercase tracking-wider">
+                            <i class="fas fa-layer-group tiffany-text mr-4 text-2xl"></i>
+                            Bodenplatte Kalkulation
+                        </h2>
+                        <span class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-[10px] font-bold text-slate-400 tracking-wider" id="tax-label">
+                            ALLE PREISE NETTO
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-2" id="calc-details-container">
+                            <!-- JS befüllt das -->
+                        </div>
+
+                        <div class="flex flex-col justify-end items-end space-y-4 text-right">
+                            <div>
+                                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Kosten gesamt (ohne 19% MwSt.)</p>
+                                <h2 class="text-5xl font-black tiffany-text mt-2" id="res-total-price">0,00 €</h2>
+                            </div>
+                            <button onclick="copyResults()" class="no-print flex items-center px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all border border-slate-700 shadow-lg">
+                                <i class="fas fa-copy mr-2"></i> Betrag kopieren
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // HIER KANNST DU UNKOMPLIZIERT NEUE TECHNIKKOMPONENTEN HINZUFÜGEN!
+        // Einfach ein neues Objekt in das Array einfügen.
+        // =========================================================================
+        const techItems = [
+            { id: "gs", name: "Gegenstromanlage", placeholder: "Modell / Leistung eintragen..." },
+            { id: "cover", name: "Überdachung", placeholder: "Schiebehalle / Modell eintragen..." },
+            { id: "wp", name: "Wärmepumpe", placeholder: "Leistung in kW / Modell eintragen..." }
+        ];
+
+        let materialMode = 'kies'; 
+        let useTax = false;
+        let bpLayers = 1; // Standardmäßig 1-lagig
+        let lastFormattedPrice = "0,00 €";
+        let calcRowsCache = []; 
+
+        // Rendert die Technikboxen beim Laden der Seite dynamisch
+        function renderTechItems() {
+            const container = document.getElementById("tech-container");
+            container.innerHTML = techItems.map(item => `
+                <div class="result-item-box flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-300 text-xs font-bold uppercase tracking-wider">${item.name}</span>
+                        <input type="checkbox" id="tech-${item.id}" onchange="toggleTechComment(this, 'comment-${item.id}-wrapper')" class="custom-checkbox">
+                    </div>
+                    <div id="comment-${item.id}-wrapper" class="hidden comment-field">
+                        <input type="text" id="comment-${item.id}" placeholder="${item.placeholder}" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-2.5 mt-3 text-xs text-white input-focus">
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function setMaterial(mode) {
+            materialMode = mode;
+            document.getElementById('btnKies').classList.toggle('active', mode === 'kies');
+            document.getElementById('btnEps').classList.toggle('active', mode === 'eps');
+            calculate();
+        }
+
+        // Umschaltung für Bewehrungslagen
+        function setLayers(count) {
+            bpLayers = count;
+            document.getElementById('btnLayer1').classList.toggle('active', count === 1);
+            document.getElementById('btnLayer2').classList.toggle('active', count === 2);
+            calculate();
+        }
+
+        function setTax(tax) {
+            useTax = tax;
+            document.getElementById('btnNetto').classList.toggle('active', !tax);
+            document.getElementById('btnBrutto').classList.toggle('active', tax);
+            document.getElementById('tax-label').innerText = tax ? "INKL. 19% MWST." : "ALLE PREISE NETTO";
+            calculate();
+        }
+
+        function toggleStairs() {
+            const hasStairs = document.getElementById('hasStairs').checked;
+            document.getElementById('card-stairs').classList.toggle('hidden', !hasStairs);
+            calculate();
+        }
+
+        function toggleTechComment(checkbox, wrapperId) {
+            const wrapper = document.getElementById(wrapperId);
+            if (checkbox.checked) {
+                wrapper.classList.remove('hidden');
+                wrapper.querySelector('input').focus();
+            } else {
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        // Live-Übertrag der Kundendaten für die statische PDF-Ansicht
+        function updatePrintInputs() {
+            const firstName = document.getElementById('cust-firstname').value || "";
+            const lastName = document.getElementById('cust-lastname').value || "";
+            const street = document.getElementById('cust-street').value || "-";
+            const city = document.getElementById('cust-city').value || "-";
+            const email = document.getElementById('cust-email').value || "-";
+            const phone = document.getElementById('cust-phone').value || "-";
+
+            document.getElementById('p-cust-name').innerText = (firstName + " " + lastName).trim() || "-";
+            document.getElementById('p-cust-street').innerText = street;
+            document.getElementById('p-cust-city').innerText = city;
+            document.getElementById('p-cust-email').innerText = email;
+            document.getElementById('p-cust-phone').innerText = phone;
+        }
+
+        // Bereitet die Daten gezielt vor und löst den standardmäßigen Print-Dialog aus
+        function prepareAndPrint() {
+            const today = new Date();
+            document.getElementById('print-date').innerText = today.toLocaleDateString('de-DE', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+
+            updatePrintInputs();
+
+            const L = document.getElementById('length').value;
+            const B = document.getElementById('width').value;
+            const T = document.getElementById('depth').value;
+            const hasStairs = document.getElementById('hasStairs').checked;
+
+            document.getElementById('p-pool-length').innerText = L + " m";
+            document.getElementById('p-pool-width').innerText = B + " m";
+            document.getElementById('p-pool-depth').innerText = T + " m";
+            document.getElementById('p-pool-mode').innerText = materialMode;
+            document.getElementById('p-pool-layers').innerText = bpLayers + "-Lagig";
+            document.getElementById('p-pool-stairs').innerText = hasStairs ? "Ja (Schienen inkl.)" : "Nein";
+
+            document.getElementById('print-row-stairs-inner').style.display = hasStairs ? "table-row" : "none";
+
+            document.getElementById('p-mat-stones').innerText = document.getElementById('res-stones').innerText;
+            document.getElementById('p-mat-ends').innerText = document.getElementById('res-ends').innerText;
+            document.getElementById('p-mat-vsteel').innerText = document.getElementById('res-vsteel').innerText;
+            document.getElementById('p-mat-hsteel').innerText = document.getElementById('res-hsteel').innerText;
+            
+            // PDF Separation der Matten & Details
+            document.getElementById('p-mat-steelmats').innerText = document.getElementById('res-steelmats').innerText; 
+            document.getElementById('p-mat-steelmats-detail').innerText = document.getElementById('res-steelmats-detail').innerText; 
+
+            document.getElementById('p-mat-vlies').innerText = document.getElementById('res-vlies-gross').innerText;
+            document.getElementById('p-mat-angles').innerText = document.getElementById('res-angles-top').innerText;
+
+            const techTbody = document.getElementById('print-tech-tbody');
+            techTbody.innerHTML = "";
+            let selectedTechCount = 0;
+
+            techItems.forEach(item => {
+                const isChecked = document.getElementById(`tech-${item.id}`).checked;
+                if (isChecked) {
+                    selectedTechCount++;
+                    const commentVal = document.getElementById(`comment-${item.id}`).value || "Keine zusätzlichen Details vermerkt.";
+                    techTbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight: bold;">${item.name}</td>
+                            <td style="font-weight: bold; color: #16a34a;"><i class="fas fa-check"></i> Ausgewählt</td>
+                            <td style="font-style: italic;">${commentVal}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if (selectedTechCount === 0) {
+                techTbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #64748b; font-style: italic; padding: 15px 0;">Keine Sonder- oder Technikausstattung ausgewählt.</td>
+                    </tr>
+                `;
+            }
+
+            const calcTbody = document.getElementById('print-calc-tbody');
+            calcTbody.innerHTML = "";
+
+            calcRowsCache.forEach(row => {
+                const isBold = row.isHighlight ? "font-weight: bold;" : "";
+                calcTbody.innerHTML += `
+                    <tr style="${isBold}">
+                        <td>${row.label}</td>
+                        <td style="text-align: right; ${isBold}">${row.value}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('p-total-price').innerText = document.getElementById('res-total-price').innerText;
+            document.getElementById('p-total-label').innerText = useTax ? "Gesamtsumme (Inkl. 19% MwSt.)" : "Gesamtsumme (Netto)";
+
+            window.print();
+        }
+
+        function calculate() {
+            const L = parseFloat(document.getElementById('length').value) || 0;
+            const B = parseFloat(document.getElementById('width').value) || 0;
+            const T = parseFloat(document.getElementById('depth').value) || 0;
+
+            const STEIN_L = 1.25;
+            const STEIN_H = 0.50;
+            const KAMMERN = 5;
+            const HORIZ_MAX = 3.50;
+
+            const umfang = 2 * (L + B);
+            const reihen = Math.ceil(T / STEIN_H);
+            const steine_pro_reihe = Math.ceil(umfang / STEIN_L) + 1;
+            const gesamt_steine = steine_pro_reihe * reihen;
+
+            document.getElementById('res-stones').innerText = gesamt_steine + " Stk";
+            document.getElementById('res-stones-detail').innerText = `${reihen} Reihen à ${steine_pro_reihe}`;
+            document.getElementById('res-ends').innerText = (reihen * 8) + " Stk";
+            document.getElementById('res-vsteel').innerText = (Math.ceil(umfang / STEIN_L) * KAMMERN) + " Stk";
+            
+            const h_staebe = Math.ceil(((umfang * (reihen + 1)) * 1.10) / HORIZ_MAX);
+            document.getElementById('res-hsteel').innerText = h_staebe + " Stk";
+            
+            const vlies_brutto = ((L * B) + (2 * L * T) + (2 * B * T)) * 1.10;
+            document.getElementById('res-vlies-gross').innerText = vlies_brutto.toFixed(2) + " m²";
+            document.getElementById('res-angles-top').innerText = Math.ceil((umfang * 1.10) / 2) + " Stk";
+
+            const BP_L = L + 0.40;
+            const BP_B = B + 0.40;
+            const BP_H = 0.20;
+            const volumen = BP_L * BP_B * BP_H;
+
+            // ANPASSUNG DER LOGIK:
+            // Verwendung eines konstanten Verschnitt- und Überlappungsfaktors von 33% (1.33)
+            // Das sorgt dafür, dass für eine 8.70x4.70m sowie 8.40x4.40m Platte exakt 8 Matten (2-lagig) herauskommen.
+            const bpFlache = BP_L * BP_B;
+            const mattenFlache = 13.80;
+            const anzahlMattenProLage = Math.ceil((bpFlache / mattenFlache) * 1.33); 
+            const anzahlMatten = anzahlMattenProLage * bpLayers;
+
+            document.getElementById('res-steelmats').innerText = anzahlMatten + " Stk";
+            document.getElementById('res-steelmats-detail').innerText = `${bpLayers}-lagig | ${anzahlMattenProLage} Stk. pro Lage`;
+
+            const VERFUELLEN = 1200.00;
+            const PREIS_ZEMENT_SACK = 5.60;
+            const MARGE_FAKTOR = 1.35;
+            const TAX_VAL = useTax ? 1.19 : 1.00;
+
+            let matKosten = 0;
+            let kiesMenge = 0;
+            let zementMenge = 0;
+            let kostenKies = 0;
+            let kostenZement = 0;
+
+            let container = document.getElementById('calc-details-container');
+            container.innerHTML = "";
+            calcRowsCache = []; 
+
+            const addDetail = (label, value, iconClass = "fa-chevron-right", isHighlight = false) => {
+                const box = document.createElement('div');
+                box.className = `flex justify-between items-center p-3 bg-slate-900/40 rounded-xl border ${isHighlight ? 'border-tiffany/50' : 'border-slate-800/50'}`;
+                box.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-lg bg-slate-800 flex items-center justify-center mr-3 no-print">
+                            <i class="fas ${iconClass} text-[10px] ${isHighlight ? 'text-tiffany' : 'text-slate-500'}"></i>
+                        </div>
+                        <p class="text-[10px] font-bold ${isHighlight ? 'text-white' : 'text-slate-400'} uppercase tracking-widest">${label}</p>
+                    </div>
+                    <p class="text-xs font-bold text-white text-right">${value}</p>
+                `;
+                container.appendChild(box);
+
+                calcRowsCache.push({
+                    label: label,
+                    value: value,
+                    isHighlight: isHighlight
+                });
+            };
+
+            addDetail("Volumen", `${volumen.toFixed(2)} m³`, "fa-cube");
+            addDetail("Bodenplatten-Fläche", `${bpFlache.toFixed(2)} m²`, "fa-expand-arrows-alt");
+            addDetail("Bewehrungsmatten Q188A", `${anzahlMatten} Stück (${bpLayers}-lagig)`, "fa-border-all");
+
+            if (materialMode === 'kies') {
+                kiesMenge = Math.ceil(volumen * 2);
+                kostenKies = kiesMenge * 50;
+                zementMenge = Math.ceil(kiesMenge * 5.6);
+                kostenZement = zementMenge * PREIS_ZEMENT_SACK;
+                matKosten = kostenKies + kostenZement;
+
+                addDetail("Kies", `${kiesMenge} t`, "fa-mountain");
+                addDetail("Zement", `${zementMenge} Säcke`, "fa-box");
+                addDetail("Kosten Kies", `${kostenKies.toFixed(2)} €`, "fa-euro-sign");
+                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} €`, "fa-euro-sign");
+            } else {
+                const kostenEps = volumen * 45;
+                zementMenge = Math.ceil(volumen * 10);
+                kostenZement = zementMenge * PREIS_ZEMENT_SACK;
+                matKosten = kostenEps + kostenZement;
+
+                addDetail("EPS Leichtbeton", `${volumen.toFixed(2)} m³`, "fa-cloud");
+                addDetail("Zement", `${zementMenge} Säcke`, "fa-box");
+                addDetail("Kosten EPS", `${kostenEps.toFixed(2)} €`, "fa-slate-500");
+                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} €`, "fa-euro-sign");
+            }
+
+            const summeOhneMarge = matKosten + VERFUELLEN;
+            const marge = summeOhneMarge * 0.35;
+            const nettopreis = summeOhneMarge + marge;
+            const finalGesamt = nettopreis * TAX_VAL;
+
+            addDetail("Kosten Marge", `${marge.toFixed(2)} €`, "fa-percent", true);
+            addDetail("Kosten gesamt ohne Marge", `${summeOhneMarge.toFixed(2)} €`, "fa-calculator");
+            addDetail("Nettopreis", `${nettopreis.toFixed(2)} €`, "fa-euro-sign", true);
+
+            lastFormattedPrice = finalGesamt.toLocaleString('de-DE', {minimumFractionDigits: 2}) + " €";
+            document.getElementById('res-total-price').innerText = lastFormattedPrice;
+        }
+
+        function copyResults() {
+            const el = document.createElement('textarea');
+            el.value = lastFormattedPrice;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-check mr-2"></i> Kopiert!';
+            setTimeout(() => btn.innerHTML = '<i class="fas fa-copy mr-2"></i> Betrag kopieren', 2000);
+        }
+
+        window.onload = () => {
+            renderTechItems();
+            calculate();
+        };
+    </script>
+</body>
+</html>
