@@ -121,6 +121,32 @@
             cursor: crosshair;
         }
 
+        /* BILD-IN-BILD (PIP) MODUS FÜR DIE ZEICHENFLÄCHE */
+        .sketch-pip-mode {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 95vw !important;
+            max-width: 1100px !important;
+            height: 85vh !important;
+            max-height: 800px !important;
+            z-index: 1000 !important;
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+            border-color: var(--tiffany) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            margin: 0 !important;
+        }
+
+        /* Füllt im PiP-Modus den verbleibenden Platz flexibel aus */
+        .sketch-pip-mode #canvasContainer {
+            flex-grow: 1 !important;
+            height: auto !important;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -198,6 +224,9 @@
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-10">
+
+    <!-- BACKDROP (Abgedunkelter Hintergrund im Bild-in-Bild-Modus) -->
+    <div id="canvasBackdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[999] hidden transition-opacity duration-300 no-print"></div>
 
     <!-- KOMPAKTE PDF-DRUCKANSICHT (Wird nur beim Drucken/PDF-Export gerendert) -->
     <div id="print-material-list">
@@ -496,8 +525,8 @@
                     </div>
                 </div>
 
-                <!-- ZEICHENFLÄCHE FÜR DEN BAULEITER -->
-                <div class="glass-card p-8 rounded-3xl no-print">
+                <!-- ZEICHENFLÄCHE FÜR DEN BAULEITER (Unterstützt zentrierten Bild-in-Bild Modus) -->
+                <div id="sketchCard" class="glass-card p-8 rounded-3xl no-print transition-all duration-300">
                     <h2 class="text-xl font-bold text-white mb-2 flex items-center uppercase tracking-wider">
                         <i class="fas fa-paint-brush mr-3 tiffany-text"></i> Vor-Ort Skizze / Lageplan
                     </h2>
@@ -617,26 +646,29 @@
         }
 
         // ==========================================
-        // CANVAS LOKALE VERGRÖSSERUNG LOGIK
+        // CANVAS BILD-IN-BILD MODAL VERGRÖSSERUNG
         // ==========================================
         function toggleCanvasSize() {
-            const container = document.getElementById('canvasContainer');
+            const card = document.getElementById('sketchCard');
+            const backdrop = document.getElementById('canvasBackdrop');
             const btn = document.getElementById('canvasSizeBtn');
             
             // Speichert die aktuelle Skizze temporär
             const tempImg = canvas.toDataURL();
             
             if (!isCanvasEnlarged) {
-                container.style.height = '640px';
+                backdrop.classList.remove('hidden');
+                card.classList.add('sketch-pip-mode');
                 btn.innerHTML = '<i class="fas fa-compress-alt mr-1"></i> Verkleinern';
                 isCanvasEnlarged = true;
             } else {
-                container.style.height = '320px';
+                backdrop.classList.add('hidden');
+                card.classList.remove('sketch-pip-mode');
                 btn.innerHTML = '<i class="fas fa-expand-alt mr-1"></i> Vergrößern';
                 isCanvasEnlarged = false;
             }
             
-            // Wartet, bis die Transition der CSS-Animation fast fertig ist, um Verzerrungen zu vermeiden
+            // Wartet, bis die CSS-Transformationen abgeschlossen sind
             setTimeout(() => {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width;
@@ -680,6 +712,13 @@
             // Setzt die internen Canvas-Maße passend zur CSS-Box
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
+
+            // Klick auf den abgedunkelten Hintergrund schließt das Zoom-Fenster ebenfalls
+            document.getElementById('canvasBackdrop').addEventListener('click', () => {
+                if (isCanvasEnlarged) {
+                    toggleCanvasSize();
+                }
+            });
 
             // Mausevents
             canvas.addEventListener('mousedown', startDrawing);
