@@ -16,7 +16,7 @@
     <title>Poolwunsch Kalkulator - by Jerry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;0;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -154,6 +154,18 @@
 
         /* PRINT STYLES FÜR DEN PDF-EXPORT */
         @media print {
+            /* Seitenspezifische CSS-Regel für den Wechsel von Hoch- auf Querformat */
+            @page {
+                size: portrait;
+                margin: 15mm;
+            }
+
+            /* Einzige Ausnahme: Die extra Skizzen-Seite soll Querformat (Landscape) erzwingen */
+            @page landscape-section {
+                size: landscape;
+                margin: 10mm;
+            }
+
             body > div.max-w-6xl {
                 display: none !important;
             }
@@ -169,7 +181,7 @@
             #print-material-list {
                 display: block !important;
                 width: 100% !important;
-                padding: 20px !important;
+                padding: 0 !important;
             }
 
             .print-table {
@@ -213,14 +225,36 @@
                 letter-spacing: 0.5px;
             }
 
+            /* Die Skizzen-Sektion erhält eine eigene CSS-Klasse für Querformat und automatischen Umbruch */
+            .print-landscape-page {
+                page: landscape-section;
+                page-break-before: always; /* Erzwingt den Sprung auf Seite 2 */
+                width: 100% !important;
+                height: 100% !important;
+                padding-top: 10px;
+            }
+
             .print-sketch-container {
                 margin-top: 15px;
-                border: 1px solid #cbd5e1;
+                border: 2px solid #cbd5e1;
                 text-align: center;
-                background: #ffffff !important; /* Heller, sauberer Hintergrund für das gedruckte PDF */
-                page-break-inside: avoid;
-                border-radius: 8px;
-                padding: 5px;
+                background: #ffffff !important; 
+                border-radius: 12px;
+                padding: 10px;
+                width: 100%;
+                /* Nutzt fast die volle Breite der horizontalen DIN-A4-Seite */
+                max-width: 260mm !important; 
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            #print-sketch-img {
+                width: 100% !important;
+                height: auto !important;
+                max-height: 155mm !important; /* Optimierte maximale Höhe für DIN-A4 Querformat */
+                object-fit: contain;
+                display: block;
+                margin: 0 auto;
             }
         }
     </style>
@@ -232,115 +266,132 @@
 
     <!-- KOMPAKTE PDF-DRUCKANSICHT (Wird nur beim Drucken/PDF-Export gerendert) -->
     <div id="print-material-list">
-        <!-- Briefkopf / Header -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0abab5; padding-bottom: 15px; margin-bottom: 20px;">
-            <div>
-                <h1 style="font-size: 24px; font-weight: 800; margin: 0; color: black;">POOLWUNSCH KALKULATION</h1>
-                <p style="color: #64748b; font-size: 10px; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Material- & Bedarfsaufstellung für Mitarbeiter</p>
+        <!-- SEITE 1: HOCHFORMAT -->
+        <div>
+            <!-- Briefkopf / Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #0abab5; padding-bottom: 15px; margin-bottom: 20px;">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: 800; margin: 0; color: black;">POOLWUNSCH KALKULATION</h1>
+                    <p style="color: #64748b; font-size: 10px; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Material- & Bedarfsaufstellung für Mitarbeiter</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-weight: bold; font-size: 12px; margin: 0;">Erstellt am: <span id="print-date">-</span></p>
+                    <p style="color: #64748b; font-size: 9px; margin: 2px 0 0 0;">Mitarbeiter: Jerry</p>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <p style="font-weight: bold; font-size: 12px; margin: 0;">Erstellt am: <span id="print-date">-</span></p>
-                <p style="color: #64748b; font-size: 9px; margin: 2px 0 0 0;">Mitarbeiter: Jerry</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 15px;">
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                    <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Kundendaten / Bauvorhaben</h3>
+                    <table style="width: 100%; font-size: 11px;">
+                        <tr><td style="width: 80px; color: #64748b; padding: 2px 0;">Name:</td><td style="font-weight: bold;" id="p-cust-name">-</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Straße:</td><td id="p-cust-street">-</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Ort:</td><td id="p-cust-city">-</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">E-Mail:</td><td id="p-cust-email">-</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Telefon:</td><td id="p-cust-phone">-</td></tr>
+                    </table>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
+                    <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Spezifikationen & Poolmaße</h3>
+                    <table style="width: 100%; font-size: 11px;">
+                        <tr><td style="width: 120px; color: #64748b; padding: 2px 0;">Länge Innen:</td><td style="font-weight: bold;" id="p-pool-length">- m</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Breite Innen:</td><td style="font-weight: bold;" id="p-pool-width">- m</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Tiefe:</td><td style="font-weight: bold;" id="p-pool-depth">- m</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Modus Verfüllung:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-mode">-</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Bewehrung BP:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-layers">1-Lagig</td></tr>
+                        <tr><td style="color: #64748b; padding: 2px 0;">Treppenanlage:</td><td style="font-weight: bold;" id="p-pool-stairs">Nein</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="print-section-header">1. Materialbedarf Becken</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Materialkomponente</th>
+                        <th style="width: 50%;">Menge / Einheit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="font-weight: bold;">Styroporsteine (BigStone)</td><td style="font-weight: bold;" id="p-mat-stones">-</td></tr>
+                    <tr><td style="font-weight: bold;">Endeinschübe</td><td id="p-mat-ends">-</td></tr>
+                    <tr><td style="font-weight: bold;">Vertikalstahl (10mm)</td><td id="p-mat-vsteel">-</td></tr>
+                    <tr><td style="font-weight: bold;">Horizontalstahl (8mm)</td><td id="p-mat-hsteel">-</td></tr>
+                    <tr><td style="font-weight: bold;">Vlies Bestellung</td><td id="p-mat-vlies">-</td></tr>
+                    <tr><td style="font-weight: bold;">Außenwinkel</td><td id="p-mat-angles">-</td></tr>
+                    <tr id="print-row-stairs-inner" style="display: none;">
+                        <td style="font-weight: bold; color: #b91c1c;">Alu-Winkelschienen (Treppe)</td>
+                        <td style="font-weight: bold; color: #b91c1c;">10 Stück</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="print-section-header">2. Bewehrung Bodenplatte</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Materialkomponente</th>
+                        <th style="width: 50%;">Menge / Einheit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="font-weight: bold;">Betonstahlmatten Q188A (6000x2300 mm)</td><td style="font-weight: bold; color: #0abab5;" id="p-mat-steelmats">-</td></tr>
+                    <tr><td style="font-weight: bold;">Auslegung / Lagen</td><td id="p-mat-steelmats-detail">-</td></tr>
+                </tbody>
+            </table>
+
+            <div class="print-section-header" id="print-tech-header">3. Gewählte Technikausstattung</div>
+            <table class="print-table" id="print-tech-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Ausstattung / Technik</th>
+                        <th style="width: 20%;">Status</th>
+                        <th style="width: 40%;">Modellspezifische Details / Kommentare</th>
+                    </tr>
+                </thead>
+                <tbody id="print-tech-tbody"></tbody>
+            </table>
+
+            <div class="print-section-header">4. Bodenplatte & Verfüllung Kalkulation</div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Posten / Leistungsbeschreibung</th>
+                        <th style="width: 50%; text-align: right;">Kalkulierter Betrag</th>
+                    </tr>
+                </thead>
+                <tbody id="print-calc-tbody"></tbody>
+            </table>
+
+            <!-- Preisbox am Ende von Seite 1 -->
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                <div style="border: 2px solid black; padding: 12px 20px; border-radius: 8px; background-color: #f8fafc; text-align: right; width: 320px;">
+                    <p style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #475569; margin: 0 0 5px 0;" id="p-total-label">Gesamtsumme (Netto)</p>
+                    <h2 style="font-size: 24px; font-weight: 900; margin: 0; color: black;" id="p-total-price">0,00 €</h2>
+                    <p style="font-size: 9px; color: #64748b; margin: 5px 0 0 0;">Freigabe und Kalkulation ohne Gewähr.</p>
+                </div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 15px;">
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
-                <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Kundendaten / Bauvorhaben</h3>
-                <table style="width: 100%; font-size: 11px;">
-                    <tr><td style="width: 80px; color: #64748b; padding: 2px 0;">Name:</td><td style="font-weight: bold;" id="p-cust-name">-</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Straße:</td><td id="p-cust-street">-</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Ort:</td><td id="p-cust-city">-</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">E-Mail:</td><td id="p-cust-email">-</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Telefon:</td><td id="p-cust-phone">-</td></tr>
-                </table>
+        <!-- SEITE 2: EXTRA SEITE IM QUERFORMAT (LANDSCAPE) FÜR DIE SKIZZE -->
+        <div id="print-sketch-section" class="print-landscape-page" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0abab5; padding-bottom: 8px; margin-bottom: 10px;">
+                <div>
+                    <h2 style="font-size: 16px; font-weight: 800; margin: 0; color: black; text-transform: uppercase; letter-spacing: 0.5px;">5. Technischer Entwurf & Lageplan (Maßstabsgetreu)</h2>
+                    <p style="color: #64748b; font-size: 9px; margin: 1px 0 0 0;">Bauvorhaben: <span id="p-sketch-cust-name" style="font-weight: bold;">-</span></p>
+                </div>
+                <div style="text-align: right; font-size: 9px; color: #64748b;">
+                    Auf iPad generierter Entwurf | Jerry • Poolwunsch Kalkulator
+                </div>
             </div>
-
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;">
-                <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #475569; margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Spezifikationen & Poolmaße</h3>
-                <table style="width: 100%; font-size: 11px;">
-                    <tr><td style="width: 120px; color: #64748b; padding: 2px 0;">Länge Innen:</td><td style="font-weight: bold;" id="p-pool-length">- m</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Breite Innen:</td><td style="font-weight: bold;" id="p-pool-width">- m</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Tiefe:</td><td style="font-weight: bold;" id="p-pool-depth">- m</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Modus Verfüllung:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-mode">-</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Bewehrung BP:</td><td style="text-transform: uppercase; font-weight: bold;" id="p-pool-layers">1-Lagig</td></tr>
-                    <tr><td style="color: #64748b; padding: 2px 0;">Treppenanlage:</td><td style="font-weight: bold;" id="p-pool-stairs">Nein</td></tr>
-                </table>
-            </div>
-        </div>
-
-        <div class="print-section-header">1. Materialbedarf Becken</div>
-        <table class="print-table">
-            <thead>
-                <tr>
-                    <th style="width: 50%;">Materialkomponente</th>
-                    <th style="width: 50%;">Menge / Einheit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td style="font-weight: bold;">Styroporsteine (BigStone)</td><td style="font-weight: bold;" id="p-mat-stones">-</td></tr>
-                <tr><td style="font-weight: bold;">Endeinschübe</td><td id="p-mat-ends">-</td></tr>
-                <tr><td style="font-weight: bold;">Vertikalstahl (10mm)</td><td id="p-mat-vsteel">-</td></tr>
-                <tr><td style="font-weight: bold;">Horizontalstahl (8mm)</td><td id="p-mat-hsteel">-</td></tr>
-                <tr><td style="font-weight: bold;">Vlies Bestellung</td><td id="p-mat-vlies">-</td></tr>
-                <tr><td style="font-weight: bold;">Außenwinkel</td><td id="p-mat-angles">-</td></tr>
-                <tr id="print-row-stairs-inner" style="display: none;">
-                    <td style="font-weight: bold; color: #b91c1c;">Alu-Winkelschienen (Treppe)</td>
-                    <td style="font-weight: bold; color: #b91c1c;">10 Stück</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="print-section-header">2. Bewehrung Bodenplatte</div>
-        <table class="print-table">
-            <thead>
-                <tr>
-                    <th style="width: 50%;">Materialkomponente</th>
-                    <th style="width: 50%;">Menge / Einheit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td style="font-weight: bold;">Betonstahlmatten Q188A (6000x2300 mm)</td><td style="font-weight: bold; color: #0abab5;" id="p-mat-steelmats">-</td></tr>
-                <tr><td style="font-weight: bold;">Auslegung / Lagen</td><td id="p-mat-steelmats-detail">-</td></tr>
-            </tbody>
-        </table>
-
-        <div class="print-section-header" id="print-tech-header">3. Gewählte Technikausstattung</div>
-        <table class="print-table" id="print-tech-table">
-            <thead>
-                <tr>
-                    <th style="width: %;">Ausstattung / Technik</th>
-                    <th style="width: 20%;">Status</th>
-                    <th style="width: %;">Modellspezifische Details / Kommentare</th>
-                </tr>
-            </thead>
-            <tbody id="print-tech-tbody"></tbody>
-        </table>
-
-        <div class="print-section-header">4. Bodenplatte & Verfüllung Kalkulation</div>
-        <table class="print-table">
-            <thead>
-                <tr>
-                    <th style="width: 50%;">Posten / Leistungsbeschreibung</th>
-                    <th style="width: 50%; text-align: right;">Kalkulierter Betrag</th>
-                </tr>
-            </thead>
-            <tbody id="print-calc-tbody"></tbody>
-        </table>
-
-        <!-- Bereich für Skizze: Erweitert mit speziellem Container -->
-        <div id="print-sketch-section" style="display: none;">
-            <div class="print-section-header">5. Vor-Ort Skizze / Lageplan</div>
+            
             <div class="print-sketch-container">
-                <img id="print-sketch-img" style="max-width: 100%; height: auto; display: block; margin: 0 auto; max-height: 380px; border-radius: 4px;" src="" alt="Bauleiterskizze">
+                <img id="print-sketch-img" src="" alt="Bauleiterskizze">
             </div>
-        </div>
-
-        <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
-            <div style="border: 2px solid black; padding: 15px 25px; border-radius: 8px; background-color: #f8fafc; text-align: right; width: 320px;">
-                <p style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #475569; margin: 0 0 5px 0;" id="p-total-label">Gesamtsumme (Netto)</p>
-                <h2 style="font-size: 26px; font-weight: 900; margin: 0; color: black;" id="p-total-price">0,00 €</h2>
-                <p style="font-size: 9px; color: #64748b; margin: 5px 0 0 0;">Freigabe und Kalkulation ohne Gewähr.</p>
+            
+            <div style="margin-top: 10px; font-size: 9px; color: #64748b; font-style: italic; text-align: center;">
+                Hinweis: Alle Maße sind Planungsrichtwerte vor Ort. Technische Änderungen vorbehalten.
             </div>
         </div>
     </div>
@@ -354,7 +405,7 @@
                     <i class="fas fa-swimmer tiffany-text text-3xl mr-4"></i>
                     <h1 class="text-4xl font-extrabold tracking-tight text-white">Poolwunsch <span class="tiffany-text">Kalkulator</span></h1>
                 </div>
-                <p class="text-slate-0 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
+                <p class="text-slate-400 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
             </div>
             <div class="flex items-center space-x-3 no-print">
                 <button onclick="prepareAndPrint()" class="flex items-center px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all border border-slate-700 shadow-xl">
@@ -395,7 +446,7 @@
                 </div>
 
                 <div class="glass-card p-6 rounded-3xl">
-                    <h2 class="text-sm font-bold mb-4 text-slate-0 uppercase tracking-widest">Modus & Bewehrung</h2>
+                    <h2 class="text-sm font-bold mb-4 text-slate-400 uppercase tracking-widest">Modus & Bewehrung</h2>
                     <div class="space-y-4">
                         <div class="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-700">
                             <button id="btnKies" onclick="setMaterial('kies')" class="toggle-btn active flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">KIES</button>
@@ -460,12 +511,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Endeinschübe</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-ends">-</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">8 Stk / Reihe</p>
+                            <p class="text-slate-400 text-[10px] mt-1">8 Stk / Reihe</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vertikalstahl</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-vsteel">-</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">10mm | à 1,55m</p>
+                            <p class="text-slate-400 text-[10px] mt-1">10mm | à 1,55m</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Horizontalstahl</p>
@@ -475,12 +526,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vlies Bestellung</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-vlies-gross">-</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">Boden & Wände</p>
+                            <p class="text-slate-400 text-[10px] mt-1">Boden & Wände</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-angles-top">-</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">Obere Kante</p>
+                            <p class="text-slate-400 text-[10px] mt-1">Obere Kante</p>
                         </div>
                     </div>
                 </div>
@@ -498,7 +549,7 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Auslegung & Verlegeart</p>
                             <h3 class="text-xl font-bold mt-1 text-white" id="res-steelmats-detail">-</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">Sichere Kalkulation inkl. 33% Überlappung</p>
+                            <p class="text-slate-400 text-[10px] mt-1">Sichere Kalkulation inkl. 33% Überlappung</p>
                         </div>
                     </div>
                 </div>
@@ -518,12 +569,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Innenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
-                            <p class="text-slate-0 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
                         </div>
                     </div>
                 </div>
@@ -535,7 +586,7 @@
                             <h2 class="text-xl font-bold text-white flex items-center uppercase tracking-wider">
                                 <i class="fas fa-paint-brush mr-3 tiffany-text"></i> Vor-Ort Skizze / Lageplan
                             </h2>
-                            <p class="text-xs text-slate-0 mt-1">iPad-Zeichnung oder automatischen KI-Entwurf auf Knopfdruck laden.</p>
+                            <p class="text-xs text-slate-400 mt-1">iPad-Zeichnung oder automatischen KI-Entwurf auf Knopfdruck laden.</p>
                         </div>
                     </div>
                     
@@ -552,13 +603,13 @@
                                 <button id="tool-freehand" onclick="setDrawingTool('freehand')" class="px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700">
                                     <i class="fas fa-signature mr-1"></i> Freihand
                                 </button>
-                                <button id="tool-line" onclick="setDrawingTool('line')" class="px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white">
+                                <button id="tool-line" onclick="setDrawingTool('line')" class="px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white">
                                     <i class="fas fa-ruler-combined mr-1"></i> Linie
                                 </button>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-[10px] font-bold text-slate-0 uppercase">Stärke:</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Stärke:</span>
                             <input type="range" id="brushSize" min="2" max="10" value="4" onchange="setBrushSize(this.value)" class="accent-[#0abab5] h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer w-24">
                         </div>
                         <div class="flex items-center space-x-2">
@@ -573,7 +624,7 @@
                             <button onclick="undoSketch()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition-all">
                                 <i class="fas fa-undo mr-1"></i> Schritt zurück
                             </button>
-                            <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg bg-red-950/ hover:bg-red-900/ text-xs font-semibold text-red-0 border border-red-900/50 transition-all">
+                            <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/40 text-xs font-semibold text-red-400 border border-red-900/50 transition-all">
                                 <i class="fas fa-trash-alt mr-1"></i> Löschen
                             </button>
                         </div>
@@ -591,9 +642,14 @@
                             <i class="fas fa-layer-group tiffany-text mr-4 text-2xl"></i>
                             Bodenplatte Kalkulation
                         </h2>
-                        <span class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-[10px] font-bold text-slate-0 tracking-wider" id="tax-label">
-                            ALLE PREISE NETTO
-                        </span>
+                        <div class="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end gap-2">
+                            <span class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-[10px] font-bold text-slate-400 tracking-wider" id="tax-label">
+                                ALLE PREISE NETTO
+                            </span>
+                            <span class="px-4 py-2 rounded-full bg-[#0abab5]/10 border border-[#0abab5]/30 text-[10px] font-bold text-tiffany tracking-wider" id="bp-dimensions-label">
+                                MAßE BP: - x - m
+                            </span>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -634,7 +690,6 @@
         let strokeWidth = 4;
         let sketchHistory = []; // Für die "Rückgängig"-Funktion
         
-        // Zeichenwerkzeug: 'freehand' (Freihand) oder 'line' (Gerade Linie)
         let activeTool = 'freehand'; 
         let startX = 0;
         let startY = 0;
@@ -708,9 +763,9 @@
             
             if (tool === 'freehand') {
                 btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
-                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white";
+                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
             } else {
-                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white";
+                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
                 btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
             }
         }
@@ -887,130 +942,72 @@
         }
 
         // ==========================================
-        // INTELLIGENTER KI-ENTWURF (AUTO-DRAW LOGIK)
+        // VEREINHEITLICHTE KI-SKIZZEN-LOGIK (mit +70cm Gesamtüberstand für die gestrichelte Bodenplatte)
         // ==========================================
         function generateAiSketch() {
-            const L = parseFloat(document.getElementById('length').value) || 0;
-            const B = parseFloat(document.getElementById('width').value) || 0;
-            const T = parseFloat(document.getElementById('depth').value) || 0;
-            const hasStairs = document.getElementById('hasStairs').checked;
+            const L = parseFloat(document.getElementById('length').value) || 6.00;
+            const B = parseFloat(document.getElementById('width').value) || 3.00;
+            const T = parseFloat(document.getElementById('depth').value) || 1.50;
+            
+            clearSketch();
 
-            clearSketch(); // Canvas leeren
-
-            // Skalierungsfaktor berechnen (Puffer für Ränder)
-            const padding = 70;
-            const scaleX = (canvas.width - padding * 2) / (L + 1.0);
-            const scaleY = (canvas.height - padding * 2) / (B + 1.0);
+            // 1. Definition eines festen Ziel-Verhältnisses 
+            // Wir nutzen 85% der verfügbaren Breite oder Höhe als Basis
+            const margin = 0.85; 
+            const scaleX = (canvas.width * margin) / (L + 1.5);
+            const scaleY = (canvas.height * margin) / (B + 1.5);
+            
+            // Wähle den kleineren Faktor, um sicherzustellen, dass nichts abgeschnitten wird
             const scale = Math.min(scaleX, scaleY);
 
-            // Mittelpunkt des Canvas
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-
-            // Pool-Dimensionen auf dem Canvas
+            
             const pw = L * scale;
             const ph = B * scale;
-
-            // Startkoordinaten für die innere Poolwand
             const x = cx - pw / 2;
             const y = cy - ph / 2;
 
-            // 1. BODENPLATTE ZEICHNEN (Grau gestrichelt, +20cm Überstand rundherum)
-            const bpW = (L + 0.) * scale;
-            const bpH = (B + 0.) * scale;
-            const bpX = cx - bpW / 2;
-            const bpY = cy - bpH / 2;
+            // 2. Zeichnung der Elemente
+            // Bodenplatte (gestrichelt, +35cm Überstand rundherum = +70cm Gesamt)
+            ctx.strokeStyle = '#475569';
+            ctx.setLineDash([6, 6]);
+            ctx.strokeRect(x - (0.35 * scale), y - (0.35 * scale), pw + (0.70 * scale), ph + (0.70 * scale));
+            ctx.setLineDash([]);
 
-            ctx.strokeStyle = '#475569'; // Schiefergrau
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 6]); // Gestrichelt
-            ctx.strokeRect(bpX, bpY, bpW, bpH);
-            ctx.setLineDash([]); // Reset für restliche Zeichnung
-
-            // Label Bodenplatte
-            ctx.fillStyle = '#64748b';
-            ctx.font = '10px Inter';
-            ctx.fillText("Bodenplatte Überstand (+20cm)", bpX + 5, bpY - 8);
-
-            // 2. STYROPORSTEINE / BECKENWAND ZEICHNEN (Tiffany-Blau, solide)
-            ctx.strokeStyle = '#0abab5'; // Tiffany
-            ctx.lineWidth = 6;
+            // Beckenwand
+            ctx.strokeStyle = '#0abab5';
+            ctx.lineWidth = Math.max(2, scale / 50);
             ctx.strokeRect(x, y, pw, ph);
 
-            // 3. EINBAUTEILE EINZEICHNEN
-            ctx.fillStyle = '#ef4444'; // Rot für technische Markierungen
-            // Skimmer (Rechts oben)
-            ctx.fillRect(x + pw - 20, y - 5, 20, 10);
+            // 3. UI-Elemente und Texte (werden relativ zum 'scale' skaliert)
+            // Skimmer
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(x + pw - (10 * (scale/100)), y - (5 * (scale/100)), 10 * (scale/100), 5 * (scale/100));
+
+            // Bemaßung - Wir setzen die Schriftgröße dynamisch, damit sie nicht verschwindet
+            const fontSize = Math.max(10, scale / 15);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '9px Inter';
-            ctx.fillText("Skimmer", x + pw - 50, y - 10);
+            ctx.font = `bold ${fontSize}px Inter`;
+            ctx.fillText(`${L.toFixed(2)} m (Innenmaß)`, cx - (pw/4), y - (fontSize));
 
-            // Einlaufdüsen (Links unten als kleine Kreise)
-            ctx.beginPath();
-            ctx.arc(x + 25, y + ph, 4, 0, Math.PI * 2);
-            ctx.arc(x + 65, y + ph, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#0abab5';
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("Einlaufdüsen", x + 15, y + ph + 15);
+            // Label Bodenplatte mit neuem Maßwert
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px Inter';
+            ctx.fillText("Bodenplatte Überstand (+35cm rundherum)", x - (0.35 * scale) + 5, y - (0.35 * scale) - 8);
 
-            // 4. TREPPE ZEICHNEN (falls aktiv)
-            if (hasStairs) {
-                ctx.strokeStyle = '#ef4444'; // Rot für Treppenanlage
-                ctx.lineWidth = 3;
-                
-                // Ecke links oben: 3 Stufen
-                ctx.beginPath();
-                ctx.moveTo(x, y + 45);
-                ctx.lineTo(x + 45, y + 45);
-                ctx.lineTo(x + 45, y);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(x, y + 30);
-                ctx.lineTo(x + 30, y + 30);
-                ctx.lineTo(x + 30, y);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(x, y + 15);
-                ctx.lineTo(x + 15, y + 15);
-                ctx.lineTo(x + 15, y);
-                ctx.stroke();
-
-                ctx.fillStyle = '#ef4444';
-                ctx.font = 'bold 9px Inter';
-                ctx.fillText("Alu-Treppe", x + 50, y + 30);
-            }
-
-            // 5. TEXT-BEMAßUNGEN AUF DER SKIZZE PLATZIEREN
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 12px Inter';
-            
-            // Länge oben zentrieren
-            ctx.fillText(`${L.toFixed(2)} m (Innenmaß)`, cx - 50, y - 15);
-            
-            // Breite links zentrieren
-            ctx.save();
-            ctx.translate(x - 15, cy);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText(`${B.toFixed(2)} m`, -15, 0);
-            ctx.restore();
-
-            // Infobox unten links platzieren
-            ctx.fillStyle = 'rgba(30, 41, 59, 0.85)';
-            ctx.fillRect(x + 15, y + ph - 55, 130, 42);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.strokeRect(x + 15, y + ph - 55, 130, 42);
+            // Infobox (unten links, relativ positioniert)
+            const boxWidth = 100;
+            const boxHeight = 40;
+            ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+            ctx.fillRect(x + 5, y + ph - boxHeight - 5, boxWidth, boxHeight);
             
             ctx.fillStyle = '#ffffff';
             ctx.font = '9px Inter';
-            ctx.fillText(`Tiefe: ${T.toFixed(2)} m`, x + 22, y + ph - 42);
-            ctx.fillText(`Bewehrung: ${bpLayers}-lagig`, x + 22, y + ph - 30);
-            ctx.fillStyle = '#0abab5';
-            ctx.fillText(`Befüllung: ${materialMode.toUpperCase()}`, x + 22, y + ph - 18);
-
-            saveState(); // Zustand speichern, damit "Schritt zurück" funktioniert!
+            ctx.fillText(`Tiefe: ${T.toFixed(2)} m`, x + 10, y + ph - 25);
+            ctx.fillText(`Bewehrung: ${bpLayers}-lagig`, x + 10, y + ph - 15);
+            
+            saveState();
         }
 
         // ==========================================
@@ -1063,7 +1060,9 @@
             const email = document.getElementById('cust-email').value || "-";
             const phone = document.getElementById('cust-phone').value || "-";
 
-            document.getElementById('p-cust-name').innerText = (firstName + " " + lastName).trim() || "-";
+            const fullName = (firstName + " " + lastName).trim() || "-";
+            document.getElementById('p-cust-name').innerText = fullName;
+            document.getElementById('p-sketch-cust-name').innerText = fullName; // Name auch auf der extra Skizzen-Seite setzen
             document.getElementById('p-cust-street').innerText = street;
             document.getElementById('p-cust-city').innerText = city;
             document.getElementById('p-cust-email').innerText = email;
@@ -1229,13 +1228,17 @@
             document.getElementById('res-vlies-gross').innerText = vlies_brutto.toFixed(2) + " m²";
             document.getElementById('res-angles-top').innerText = Math.ceil((umfang * 1.10) / 2) + " Stk";
 
-            // ÄNDERUNG: +70cm (0.70m) statt +40cm auf Länge und Breite der Bodenplatte
+            // HIER IST DIE GEWÜNSCHTE ANPASSUNG: +70 cm Gesamtüberstand (+35 cm rundherum)
             const BP_L = L + 0.70;
             const BP_B = B + 0.70;
-            const BP_H = 0.20; // 20cm Dicke bleibt gleich
+            const BP_H = 0.20;
             const volumen = BP_L * BP_B * BP_H;
 
             const bpFlache = BP_L * BP_B;
+            
+            // Dynamische Anzeige der exakten Bodenplatten-Maße im neuen Badge
+            document.getElementById('bp-dimensions-label').innerText = `MAßE BP: ${BP_L.toFixed(2)}m x ${BP_B.toFixed(2)}m`;
+
             const mattenFlache = 13.80;
             const anzahlMattenProLage = Math.ceil((bpFlache / mattenFlache) * 1.33); 
             const anzahlMatten = anzahlMattenProLage * bpLayers;
@@ -1297,7 +1300,7 @@
                 addDetail("EPS Leichtbeton", `${volumen.toFixed(2)} m³`, "fa-cloud");
                 addDetail("Zement", `${zementMenge} Säcke`, "fa-box");
                 addDetail("Kosten EPS", `${kostenEps.toFixed(2)} €`, "fa-slate-500");
-                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} €`);
+                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} € nudge`);
             }
 
             const summeOhneMarge = matKosten + VERFUELLEN;
