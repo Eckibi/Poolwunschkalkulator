@@ -647,7 +647,7 @@
                                 ALLE PREISE NETTO
                             </span>
                             <span class="px-4 py-2 rounded-full bg-[#0abab5]/10 border border-[#0abab5]/30 text-[10px] font-bold text-tiffany tracking-wider" id="bp-dimensions-label">
-                                - x - m
+                                MAßE BP: - x - m
                             </span>
                         </div>
                     </div>
@@ -1237,7 +1237,7 @@
             const bpFlache = BP_L * BP_B;
             
             // Dynamische Anzeige der exakten Bodenplatten-Maße im neuen Badge
-            document.getElementById('bp-dimensions-label').innerText = `MAßE BP: ${BP_L.toFixed(2)}m x ${BP_B.toFixed(2)}m`;
+            document.getElementById('bp-dimensions-label').innerText = `${BP_L.toFixed(2)}m x ${BP_B.toFixed(2)}m`;
 
             const mattenFlache = 13.80;
             const anzahlMattenProLage = Math.ceil((bpFlache / mattenFlache) * 1.33); 
