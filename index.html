@@ -16,7 +16,7 @@
     <title>Poolwunsch Kalkulator - by Jerry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;0;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -309,9 +309,9 @@
         <table class="print-table" id="print-tech-table">
             <thead>
                 <tr>
-                    <th style="width: 40%;">Ausstattung / Technik</th>
+                    <th style="width: %;">Ausstattung / Technik</th>
                     <th style="width: 20%;">Status</th>
-                    <th style="width: 40%;">Modellspezifische Details / Kommentare</th>
+                    <th style="width: %;">Modellspezifische Details / Kommentare</th>
                 </tr>
             </thead>
             <tbody id="print-tech-tbody"></tbody>
@@ -354,7 +354,7 @@
                     <i class="fas fa-swimmer tiffany-text text-3xl mr-4"></i>
                     <h1 class="text-4xl font-extrabold tracking-tight text-white">Poolwunsch <span class="tiffany-text">Kalkulator</span></h1>
                 </div>
-                <p class="text-slate-400 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
+                <p class="text-slate-0 uppercase text-[10px] tracking-widest font-bold ml-10">@PBR Poolwunsch Kalkulator ~Jerry</p>
             </div>
             <div class="flex items-center space-x-3 no-print">
                 <button onclick="prepareAndPrint()" class="flex items-center px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all border border-slate-700 shadow-xl">
@@ -395,7 +395,7 @@
                 </div>
 
                 <div class="glass-card p-6 rounded-3xl">
-                    <h2 class="text-sm font-bold mb-4 text-slate-400 uppercase tracking-widest">Modus & Bewehrung</h2>
+                    <h2 class="text-sm font-bold mb-4 text-slate-0 uppercase tracking-widest">Modus & Bewehrung</h2>
                     <div class="space-y-4">
                         <div class="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-700">
                             <button id="btnKies" onclick="setMaterial('kies')" class="toggle-btn active flex-1 py-2 text-[10px] font-bold rounded-lg transition-all">KIES</button>
@@ -460,12 +460,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Endeinschübe</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-ends">-</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">8 Stk / Reihe</p>
+                            <p class="text-slate-0 text-[10px] mt-1">8 Stk / Reihe</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vertikalstahl</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-vsteel">-</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">10mm | à 1,55m</p>
+                            <p class="text-slate-0 text-[10px] mt-1">10mm | à 1,55m</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Horizontalstahl</p>
@@ -475,12 +475,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vlies Bestellung</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-vlies-gross">-</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">Boden & Wände</p>
+                            <p class="text-slate-0 text-[10px] mt-1">Boden & Wände</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white" id="res-angles-top">-</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">Obere Kante</p>
+                            <p class="text-slate-0 text-[10px] mt-1">Obere Kante</p>
                         </div>
                     </div>
                 </div>
@@ -498,7 +498,7 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Auslegung & Verlegeart</p>
                             <h3 class="text-xl font-bold mt-1 text-white" id="res-steelmats-detail">-</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">Sichere Kalkulation inkl. 33% Überlappung</p>
+                            <p class="text-slate-0 text-[10px] mt-1">Sichere Kalkulation inkl. 33% Überlappung</p>
                         </div>
                     </div>
                 </div>
@@ -518,12 +518,12 @@
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Innenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                            <p class="text-slate-0 text-[10px] mt-1">Maß: 5x5x200 mm</p>
                         </div>
                         <div class="result-item-box">
                             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Außenwinkel</p>
                             <h3 class="text-2xl font-black mt-1 text-white">5 Stück</h3>
-                            <p class="text-slate-400 text-[10px] mt-1">Maß: 5x5x200 mm</p>
+                            <p class="text-slate-0 text-[10px] mt-1">Maß: 5x5x200 mm</p>
                         </div>
                     </div>
                 </div>
@@ -535,7 +535,7 @@
                             <h2 class="text-xl font-bold text-white flex items-center uppercase tracking-wider">
                                 <i class="fas fa-paint-brush mr-3 tiffany-text"></i> Vor-Ort Skizze / Lageplan
                             </h2>
-                            <p class="text-xs text-slate-400 mt-1">iPad-Zeichnung oder automatischen KI-Entwurf auf Knopfdruck laden.</p>
+                            <p class="text-xs text-slate-0 mt-1">iPad-Zeichnung oder automatischen KI-Entwurf auf Knopfdruck laden.</p>
                         </div>
                     </div>
                     
@@ -552,13 +552,13 @@
                                 <button id="tool-freehand" onclick="setDrawingTool('freehand')" class="px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700">
                                     <i class="fas fa-signature mr-1"></i> Freihand
                                 </button>
-                                <button id="tool-line" onclick="setDrawingTool('line')" class="px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white">
+                                <button id="tool-line" onclick="setDrawingTool('line')" class="px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white">
                                     <i class="fas fa-ruler-combined mr-1"></i> Linie
                                 </button>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Stärke:</span>
+                            <span class="text-[10px] font-bold text-slate-0 uppercase">Stärke:</span>
                             <input type="range" id="brushSize" min="2" max="10" value="4" onchange="setBrushSize(this.value)" class="accent-[#0abab5] h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer w-24">
                         </div>
                         <div class="flex items-center space-x-2">
@@ -573,7 +573,7 @@
                             <button onclick="undoSketch()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition-all">
                                 <i class="fas fa-undo mr-1"></i> Schritt zurück
                             </button>
-                            <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/40 text-xs font-semibold text-red-400 border border-red-900/50 transition-all">
+                            <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg bg-red-950/ hover:bg-red-900/ text-xs font-semibold text-red-0 border border-red-900/50 transition-all">
                                 <i class="fas fa-trash-alt mr-1"></i> Löschen
                             </button>
                         </div>
@@ -591,7 +591,7 @@
                             <i class="fas fa-layer-group tiffany-text mr-4 text-2xl"></i>
                             Bodenplatte Kalkulation
                         </h2>
-                        <span class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-[10px] font-bold text-slate-400 tracking-wider" id="tax-label">
+                        <span class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-[10px] font-bold text-slate-0 tracking-wider" id="tax-label">
                             ALLE PREISE NETTO
                         </span>
                     </div>
@@ -708,9 +708,9 @@
             
             if (tool === 'freehand') {
                 btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
-                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
+                btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white";
             } else {
-                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-400 hover:text-white";
+                btnFreehand.className = "px-2.5 py-1.5 rounded-md font-bold text-slate-0 hover:text-white";
                 btnLine.className = "px-2.5 py-1.5 rounded-md font-bold text-white bg-slate-700";
             }
         }
@@ -916,8 +916,8 @@
             const y = cy - ph / 2;
 
             // 1. BODENPLATTE ZEICHNEN (Grau gestrichelt, +20cm Überstand rundherum)
-            const bpW = (L + 0.40) * scale;
-            const bpH = (B + 0.40) * scale;
+            const bpW = (L + 0.) * scale;
+            const bpH = (B + 0.) * scale;
             const bpX = cx - bpW / 2;
             const bpY = cy - bpH / 2;
 
@@ -1229,9 +1229,10 @@
             document.getElementById('res-vlies-gross').innerText = vlies_brutto.toFixed(2) + " m²";
             document.getElementById('res-angles-top').innerText = Math.ceil((umfang * 1.10) / 2) + " Stk";
 
-            const BP_L = L + 0.40;
-            const BP_B = B + 0.40;
-            const BP_H = 0.20;
+            // ÄNDERUNG: +70cm (0.70m) statt +40cm auf Länge und Breite der Bodenplatte
+            const BP_L = L + 0.70;
+            const BP_B = B + 0.70;
+            const BP_H = 0.20; // 20cm Dicke bleibt gleich
             const volumen = BP_L * BP_B * BP_H;
 
             const bpFlache = BP_L * BP_B;
@@ -1296,7 +1297,7 @@
                 addDetail("EPS Leichtbeton", `${volumen.toFixed(2)} m³`, "fa-cloud");
                 addDetail("Zement", `${zementMenge} Säcke`, "fa-box");
                 addDetail("Kosten EPS", `${kostenEps.toFixed(2)} €`, "fa-slate-500");
-                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} € nudge`);
+                addDetail("Kosten Zement", `${kostenZement.toFixed(2)} €`);
             }
 
             const summeOhneMarge = matKosten + VERFUELLEN;
