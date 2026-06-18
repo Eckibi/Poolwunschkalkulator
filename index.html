@@ -1567,7 +1567,7 @@
             ctx.fillText("PROJEKT: POOLWUNSCH", stampX + 8, stampY + 12);
             ctx.fillStyle = '#ffffff';
             ctx.font = '7px Inter';
-            ctx.fillText(`Kunde: ${document.getElementById('cust-lastname').value || "Jerry"}`, stampX + 8, stampY + 24);
+            ctx.fillText(`Kunde: ${document.getElementById('cust-lastname').value || "-"}`, stampX + 8, stampY + 24);
             ctx.fillText(`Wasserinhalt: ${(L * B * T * 1000).toLocaleString('de-DE')} Liter`, stampX + 8, stampY + 34);
             ctx.fillText(`Bodenplatte: ${((L+0.7)*(B+0.7)).toFixed(2)} m²`, stampX + 8, stampY + 44);
             ctx.fillText(`Bewehrung: Q188A (${bpLayers}-lagig)`, stampX + 8, stampY + 54);
